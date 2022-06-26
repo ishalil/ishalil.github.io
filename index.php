@@ -1,102 +1,45 @@
 <?php
-get_header();
+/**
+ * The template for displaying all pages.
+ *
+ * This is the template that displays all pages by default.
+ * Please note that this is the WordPress construct of pages
+ * and that other 'pages' on your WordPress site may use a
+ * different template.
+ *
+ * @link    https://codex.wordpress.org/Template_Hierarchy
+ *
+ * @package Shapely
+ */
 
-$layout       = get_theme_mod( 'projects_layout_view', 'mansonry' );
-$layout_class = shapely_get_layout_class();
+get_header(); ?>
+<?php $layout_class = shapely_get_layout_class(); ?>
+	<div class="row">
+		<?php
+		if ( 'sidebar-left' == $layout_class ) :
+			get_sidebar();
+		endif;
+		?>
+		<div id="primary" class="col-md-8 mb-xs-24 <?php echo esc_attr( $layout_class ); ?>">
+																<?php
+																while ( have_posts() ) :
+																	the_post();
 
-$item_classes = 'post-snippet col-md-3 col-sm-6 project';
-if ( 'mansonry' == $layout ) {
-	$item_classes .= ' masonry-item';
-}
+																	get_template_part( 'template-parts/content', 'page' );
 
-if ( 'sidebar-left' == $layout_class ) :
-	get_sidebar();
-endif;
+																	// If comments are open or we have at least one comment, load up the comment template.
+																	if ( comments_open() || get_comments_number() ) :
+																		comments_template();
+																		endif;
 
-
-?>
-	<div id="primary" class="content-area col-md-8 mb-xs-24 <?php echo esc_attr( $layout_class ); ?>">
-		<main id="main" class="site-main" role="main">
-
-			<?php
-			if ( have_posts() ) :
+			endwhile; // End of the loop.
 			?>
-
-			<?php if ( 'mansonry' == $layout ) : ?>
-				<div class="masonry-loader fixed-center">
-					<div class="col-sm-12 text-center">
-						<div class="spinner"></div>
-					</div>
-				</div>
-			<?php endif ?>
-
-			<div class="<?php echo 'mansonry' == $layout ? 'masonry masonryFlyIn' : ''; ?>">
-				<?php
-				/* Start the Loop */
-				while ( have_posts() ) :
-					the_post();
-					$projects_args = array(
-						'fields' => 'names',
-					);
-					$project_types = wp_get_post_terms( $post->ID, 'jetpack-portfolio-type', $projects_args );
-
-					$thumbnail_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
-					$item_style    = '';
-					if ( 'mansonry' != $layout ) {
-						$item_style = 'background-image: url(' . $thumbnail_url . ')';
-					}
-					?>
-
-					<article id="post-<?php the_ID(); ?>" <?php post_class( $item_classes ); ?>>
-						<div class="image-tile inner-title hover-reveal text-center" style="<?php echo $item_style; ?>">
-							<?php
-							if ( has_post_thumbnail() ) {
-
-								$portfolio_custom_url = get_post_meta( get_the_ID(), 'shapely_companion_portfolio_link', true );
-
-								if ( ! $portfolio_custom_url ) {
-									$portfolio_custom_url = get_the_permalink();
-								}
-
-								?>
-								<a href="<?php echo esc_url( $portfolio_custom_url ); ?>" title="<?php the_title_attribute(); ?>">
-									<?php
-									if ( 'mansonry' == $layout ) {
-										the_post_thumbnail( 'medium' );
-									}
-									?>
-									<div class="title">
-										<?php
-										the_title( '<h5 class="mb0">', '</h5>' );
-										if ( ! empty( $project_types ) ) {
-											echo '<span>' . implode( ' / ', $project_types ) . '</span>';
-										}
-										?>
-									</div>
-								</a>
-								<?php
-							}
-							?>
-						</div>
-					</article><!-- #post-## -->
-				<?php
-
-				endwhile;
-
-				the_posts_navigation();
-
-				else :
-
-					get_template_part( 'template-parts/content', 'none' );
-
-				endif;
-				?>
-
-		</main><!-- #main -->
-	</div><!-- #primary -->
+		</div><!-- #primary -->
+		<?php
+		if ( 'sidebar-right' == $layout_class ) :
+			get_sidebar();
+		endif;
+		?>
+	</div>
 <?php
-if ( 'sidebar-right' == $layout_class ) :
-	get_sidebar();
-endif;
-
 get_footer();
